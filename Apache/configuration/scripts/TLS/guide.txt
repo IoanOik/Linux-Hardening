@@ -1,0 +1,14 @@
+# Ensure the Server's Private Key Is Protected
+
+1) All private keys must be stored separately from the public certificates. Find all
+SSLCertificateFile directives in the Apache configuration files. For any
+SSLCertificateFile directives that do not have a corresponding separate
+SSLCertificateKeyFile directive, move the key to a separate file from the
+certificate, and add the SSLCertificateKeyFile directive for the key file.
+
+2) For each of the SSLCertificateKeyFile directives, change the ownership and
+permissions on the server private key to be owned by root:root with permission
+0400.
+
+
+

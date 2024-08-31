@@ -1,0 +1,28 @@
+# Ensure Options for the OS Root Directory Are Restricted
+# The same can be applied for the Web Root Directory
+
+<Directory />
+	. . .
+	Options None
+	. . .
+</Directory>
+
+# Ensure HTTP Request Methods Are Restricted
+
+Add the following directive in the Directory directive of Root Document:
+
+<LimitExcept GET POST OPTIONS>
+	Require all denied
+</LimitExcept>
+
+
+# Ensure Old HTTP Protocol Versions Are Disallowed
+
+By default, mod_rewrite configuration settings from the main server context are
+not inherited by virtual hosts. Therefore, it is also necessary to add the following
+directives in each section to inherit the main server settings:
+
+	RewriteEngine On
+	RewriteOptions Inherit
+	
+

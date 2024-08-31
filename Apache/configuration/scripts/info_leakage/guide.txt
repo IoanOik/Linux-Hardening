@@ -1,0 +1,15 @@
+# Ensure All Default Apache Content is Removed
+
+Comment out the icon alias directive and the directory access control
+configuration, inside /etc/httpd/conf.d/autoindex.conf file.
+
+# Alias /icons/ "/usr/share/httpd/icons/"
+
+# <Directory "/usr/share/httpd/icons">
+#    Options Indexes MultiViews FollowSymlinks
+#    AllowOverride None
+#    Require all granted
+# </Directory>
+
+
+

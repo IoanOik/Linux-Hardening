@@ -1,0 +1,60 @@
+#!/usr/sbin/nft -f
+
+# Flush all existing nftables rules and reset the ruleset
+flush ruleset
+
+# Load nftables ruleset configuration
+# This configuration defines an inet table named 'filter' to handle traffic filtering.
+table inet filter {
+
+    # 'input' chain: Handles incoming packets
+    chain input {
+        type filter hook input priority 0; policy drop;  # Set default policy to drop all incoming traffic
+        
+        # Allow traffic from the loopback interface if not forged
+        iif lo accept  # Allow loopback interface traffic
+        iif != lo ip saddr 127.0.0.1/8 drop  # Drop traffic with spoofed IPv4 loopback addresses
+        iif != lo ip6 saddr ::1/128 drop  # Drop traffic with spoofed IPv6 loopback addresses
+        
+        # Allow established connections to pass through
+        ip protocol tcp ct state established accept  # Allow established TCP connections
+        ip protocol udp ct state established accept  # Allow established UDP connections
+        ip protocol icmp ct state established accept  # Allow established ICMP connections
+        
+        # Allow IGMP traffic from anywhere
+        ip protocol igmp accept
+        
+        # Allow SSH connections on the default port (22)
+        tcp dport ssh accept
+        
+        # Allow specific ICMPv6 types, typically for diagnostics and neighbor discovery
+        icmpv6 type { 
+            destination-unreachable, packet-too-big, time-exceeded, 
+            parameter-problem, mld-listener-query, mld-listener-report, 
+            mld-listener-done, nd-router-solicit, nd-router-advert, 
+            nd-neighbor-solicit, nd-neighbor-advert, 
+            ind-neighbor-solicit, ind-neighbor-advert, 
+            mld2-listener-report 
+        } accept
+        
+        # Allow specific ICMP types, typically used for diagnostics
+        icmp type { 
+            destination-unreachable, router-advertisement, 
+            router-solicitation, time-exceeded, 
+            parameter-problem 
+        } accept
+    }
+
+    # 'forward' chain: Handles packets that are being routed through the system (not for this system)
+    chain forward {
+        # Drop all forwarded traffic
+        type filter hook forward priority 0; policy drop;
+    }
+
+    # 'output' chain: Handles outgoing packets
+    chain output {
+        # Allow all outgoing traffic (default policy is accept)
+        type filter hook output priority 0; policy accept;
+    }
+}
+
